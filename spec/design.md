@@ -18,6 +18,8 @@
 │   │  - findStudent()   精准查询               │   │
 │   │  - listStudents()  列表查询               │   │
 │   │  - calcStats()     成绩统计               │   │
+│   │  - updateStudent() 修改学生               │   │
+│   │  - deleteStudent() 删除学生               │   │
 │   │  - validate()      数据校验               │   │
 │   └────────────────┬──────────────────────────┘   │
 │                    │                               │
@@ -55,6 +57,8 @@
 | `listStudents(students)` | `Array` | `{success, message, data}` | 获取全部学生列表 |
 | `calcStudentStats(student)` | `Object` | `{total, average}` | 计算单个学生总分和平均分 |
 | `calcClassStats(students)` | `Array` | `{chinese, math, english}` | 计算班级各科平均分 |
+| `updateStudent(students, id, fields)` | `Array, String, Object` | `{success, message, data}` | 按学号修改学生信息（部分更新） |
+| `deleteStudent(students, id)` | `Array, String` | `{success, message, data}` | 按学号删除学生记录 |
 | `validateStudent(student, students)` | `Object, Array` | `{valid, errors}` | 校验学生数据合法性 |
 
 ### 2.3 CLI 入口（src/main.js）
@@ -119,6 +123,12 @@
 - 全局容错（非法输入、空数据等）
 - 自动持久化确认
 - CLI 统计交互
+
+### Change 5: 学生信息修改与删除
+- 按学号修改学生姓名/成绩（部分更新）
+- 按学号删除学生记录（确认后删除）
+- 修改后数据校验
+- CLI 编辑/删除交互
 
 ## 五、交互逻辑设计
 
