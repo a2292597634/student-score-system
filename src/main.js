@@ -10,7 +10,9 @@ import {
   findStudent,
   listStudents,
   calcStudentStats,
-  calcClassStats
+  calcClassStats,
+  updateStudent,
+  deleteStudent
 } from './student.js';
 
 // 全局学生数据
@@ -92,8 +94,9 @@ async function doQuery() {
   console.log('\n--- 查询学生成绩 ---');
   console.log('1. 按学号精准查询');
   console.log('2. 查看全部学生');
+  console.log('3. 修改与删除');
 
-  const choice = (await rl.question('请选择（1-2）：')).trim();
+  const choice = (await rl.question('请选择（1-3）：')).trim();
 
   if (choice === '1') {
     const id = (await rl.question('请输入要查询的学号：')).trim();
@@ -115,8 +118,20 @@ async function doQuery() {
     } else {
       console.log(`✗ ${result.message}`);
     }
+  } else if (choice === '3') {
+    console.log('\n--- 修改与删除学生 ---');
+    console.log('1. 修改学生信息');
+    console.log('2. 删除学生记录');
+    const sub = (await rl.question('请选择（1-2）：')).trim();
+    if (sub === '1') {
+      await doEdit();
+    } else if (sub === '2') {
+      await doDelete();
+    } else {
+      console.log('无效选择，请选择 1-2');
+    }
   } else {
-    console.log('无效选择，请选择 1-2');
+    console.log('无效选择，请选择 1-3');
   }
 }
 
@@ -193,6 +208,87 @@ async function doListAll() {
       const stats = calcStudentStats(s);
       console.log(`${s.id}\t${s.name}\t${s.chinese}\t${s.math}\t${s.english}\t${stats.total}\t${stats.average}`);
     }
+  } else {
+    console.log(`✗ ${result.message}`);
+  }
+}
+
+/**
+ * 修改学生信息
+ */
+async function doEdit() {
+  const id = (await rl.question('请输入要修改的学号：')).trim();
+  const findResult = findStudent(students, id);
+  if (!findResult.success) {
+    console.log(`✗ ${findResult.message}`);
+    return;
+  }
+
+  console.log('\n当前信息：');
+  printStudent(findResult.data);
+  console.log('\n请输入新值（直接回车保留原值）：');
+
+  const name = (await rl.question(`姓名 [${findResult.data.name}]：`)).trim();
+  const chineseStr = (await rl.question(`语文 [${findResult.data.chinese}]：`)).trim();
+  const mathStr = (await rl.question(`数学 [${findResult.data.math}]：`)).trim();
+  const englishStr = (await rl.question(`英语 [${findResult.data.english}]：`)).trim();
+
+  const fields = {};
+  if (name) fields.name = name;
+  if (chineseStr) {
+    const v = Number(chineseStr);
+    if (isNaN(v)) { console.log('✗ 成绩必须为有效数字'); return; }
+    fields.chinese = v;
+  }
+  if (mathStr) {
+    const v = Number(mathStr);
+    if (isNaN(v)) { console.log('✗ 成绩必须为有效数字'); return; }
+    fields.math = v;
+  }
+  if (englishStr) {
+    const v = Number(englishStr);
+    if (isNaN(v)) { console.log('✗ 成绩必须为有效数字'); return; }
+    fields.english = v;
+  }
+
+  if (Object.keys(fields).length === 0) {
+    console.log('未提供任何修改，操作取消');
+    return;
+  }
+
+  const result = updateStudent(students, id, fields);
+  if (result.success) {
+    saveStudents(students);
+    console.log(`✓ ${result.message}`);
+  } else {
+    console.log(`✗ ${result.message}`);
+  }
+}
+
+/**
+ * 删除学生记录
+ */
+async function doDelete() {
+  const id = (await rl.question('请输入要删除的学号：')).trim();
+  const findResult = findStudent(students, id);
+  if (!findResult.success) {
+    console.log(`✗ ${findResult.message}`);
+    return;
+  }
+
+  console.log('\n将要删除以下学生：');
+  printStudent(findResult.data);
+
+  const confirm = (await rl.question('\n确认删除？(y/N)：')).trim().toLowerCase();
+  if (confirm !== 'y') {
+    console.log('操作已取消');
+    return;
+  }
+
+  const result = deleteStudent(students, id);
+  if (result.success) {
+    saveStudents(students);
+    console.log(`✓ ${result.message}`);
   } else {
     console.log(`✗ ${result.message}`);
   }

@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 describe('学生管理 Student', () => {
-  let addStudent, validateStudent, findStudent, listStudents, calcStudentStats, calcClassStats;
+  let addStudent, validateStudent, findStudent, listStudents, calcStudentStats, calcClassStats, updateStudent, deleteStudent;
 
   beforeEach(async () => {
     const mod = await import('../src/student.js');
@@ -38,6 +38,8 @@ describe('学生管理 Student', () => {
     listStudents = mod.listStudents;
     calcStudentStats = mod.calcStudentStats;
     calcClassStats = mod.calcClassStats;
+    updateStudent = mod.updateStudent;
+    deleteStudent = mod.deleteStudent;
   });
 
   describe('validateStudent()', () => {
@@ -300,6 +302,92 @@ describe('学生管理 Student', () => {
       expect(result.chinese).toBe(0);
       expect(result.math).toBe(0);
       expect(result.english).toBe(0);
+    });
+  });
+
+  describe('updateStudent()', () => {
+    it('应该成功修改学生姓名', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 }
+      ];
+      const result = updateStudent(students, '001', { name: '张三丰' });
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('学生信息修改成功');
+      expect(result.data.name).toBe('张三丰');
+      expect(result.data.chinese).toBe(85);
+      expect(result.data.math).toBe(92);
+      expect(result.data.english).toBe(78);
+      expect(students[0].name).toBe('张三丰');
+    });
+
+    it('应该支持部分字段更新（只修改成绩）', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 }
+      ];
+      const result = updateStudent(students, '001', { math: 100 });
+
+      expect(result.success).toBe(true);
+      expect(result.data.math).toBe(100);
+      expect(result.data.chinese).toBe(85);
+      expect(result.data.english).toBe(78);
+      expect(result.data.name).toBe('张三');
+    });
+
+    it('应该在校号不存在时拒绝修改', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 }
+      ];
+      const result = updateStudent(students, '999', { name: '不存在' });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('未找到学号为 999 的学生');
+      expect(students.length).toBe(1);
+    });
+
+    it('应该在修改后数据不合法时拒绝', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 }
+      ];
+      const result = updateStudent(students, '001', { chinese: 999 });
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('成绩必须在0-100之间');
+      expect(students[0].chinese).toBe(85); // 原值不变
+    });
+  });
+
+  describe('deleteStudent()', () => {
+    it('应该成功删除学生', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 },
+        { id: '002', name: '李四', chinese: 90, math: 88, english: 95 }
+      ];
+      const result = deleteStudent(students, '001');
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('学生信息删除成功');
+      expect(result.data.id).toBe('001');
+      expect(students.length).toBe(1);
+      expect(students[0].id).toBe('002');
+    });
+
+    it('应该在校号不存在时拒绝删除', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 }
+      ];
+      const result = deleteStudent(students, '999');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('未找到学号为 999 的学生');
+      expect(students.length).toBe(1);
+    });
+
+    it('应该在数据为空时拒绝删除', () => {
+      const result = deleteStudent([], '001');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('暂无学生数据，请先录入');
     });
   });
 });

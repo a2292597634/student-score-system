@@ -187,3 +187,80 @@ export function calcClassStats(students) {
     english: Math.round((totals.english / count) * 10) / 10
   };
 }
+
+/**
+ * 修改学生信息（部分更新）
+ * @param {Array} students - 学生列表（会被原地修改）
+ * @param {string} id - 要修改的学生学号
+ * @param {Object} fields - 要更新的字段 {name?, chinese?, math?, english?}
+ * @returns {{success: boolean, message: string, data: Object|null}}
+ */
+export function updateStudent(students, id, fields) {
+  if (!students || students.length === 0) {
+    return { success: false, message: '暂无学生数据，请先录入', data: null };
+  }
+
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    return { success: false, message: '请输入要修改的学号', data: null };
+  }
+
+  const trimmedId = id.trim();
+  const index = students.findIndex((s) => s.id === trimmedId);
+
+  if (index === -1) {
+    return { success: false, message: `未找到学号为 ${trimmedId} 的学生`, data: null };
+  }
+
+  // 合并现有数据与更新字段
+  const current = students[index];
+  const updated = {
+    id: current.id,
+    name: fields.name !== undefined ? String(fields.name).trim() : current.name,
+    chinese: fields.chinese !== undefined ? fields.chinese : current.chinese,
+    math: fields.math !== undefined ? fields.math : current.math,
+    english: fields.english !== undefined ? fields.english : current.english
+  };
+
+  // 校验修改后的数据（排除自身学号去重检查）
+  const others = students.filter((_, i) => i !== index);
+  const { valid, errors } = validateStudent(updated, others);
+
+  if (!valid) {
+    return { success: false, message: errors[0], data: null };
+  }
+
+  // 写入修改后的数据
+  updated.chinese = Number(updated.chinese);
+  updated.math = Number(updated.math);
+  updated.english = Number(updated.english);
+  students[index] = updated;
+
+  return { success: true, message: '学生信息修改成功', data: updated };
+}
+
+/**
+ * 删除学生记录
+ * @param {Array} students - 学生列表（会被原地修改）
+ * @param {string} id - 要删除的学生学号
+ * @returns {{success: boolean, message: string, data: Object|null}}
+ */
+export function deleteStudent(students, id) {
+  if (!students || students.length === 0) {
+    return { success: false, message: '暂无学生数据，请先录入', data: null };
+  }
+
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    return { success: false, message: '请输入要删除的学号', data: null };
+  }
+
+  const trimmedId = id.trim();
+  const index = students.findIndex((s) => s.id === trimmedId);
+
+  if (index === -1) {
+    return { success: false, message: `未找到学号为 ${trimmedId} 的学生`, data: null };
+  }
+
+  const [deleted] = students.splice(index, 1);
+
+  return { success: true, message: '学生信息删除成功', data: deleted };
+}
