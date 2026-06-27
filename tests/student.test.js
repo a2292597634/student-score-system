@@ -28,12 +28,14 @@ afterEach(() => {
 });
 
 describe('学生管理 Student', () => {
-  let addStudent, validateStudent;
+  let addStudent, validateStudent, findStudent, listStudents;
 
   beforeEach(async () => {
     const mod = await import('../src/student.js');
     addStudent = mod.addStudent;
     validateStudent = mod.validateStudent;
+    findStudent = mod.findStudent;
+    listStudents = mod.listStudents;
   });
 
   describe('validateStudent()', () => {
@@ -167,6 +169,71 @@ describe('学生管理 Student', () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe('成绩必须为有效数字');
       expect(students.length).toBe(0);
+    });
+  });
+
+  describe('findStudent()', () => {
+    it('应该在学号存在时返回学生完整信息', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 },
+        { id: '002', name: '李四', chinese: 90, math: 88, english: 95 }
+      ];
+
+      const result = findStudent(students, '001');
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('查询成功');
+      expect(result.data).toEqual({ id: '001', name: '张三', chinese: 85, math: 92, english: 78 });
+    });
+
+    it('应该在学号不存在时给出友好提示', () => {
+      const students = [{ id: '001', name: '张三', chinese: 85, math: 92, english: 78 }];
+
+      const result = findStudent(students, '999');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('未找到学号为 999 的学生');
+      expect(result.data).toBe(null);
+    });
+
+    it('应该在数据为空时提示先录入', () => {
+      const result = findStudent([], '001');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('暂无学生数据，请先录入');
+      expect(result.data).toBe(null);
+    });
+
+    it('应该在学号为空时提示输入学号', () => {
+      const students = [{ id: '001', name: '张三', chinese: 85, math: 92, english: 78 }];
+      const result = findStudent(students, '');
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('请输入要查询的学号');
+    });
+  });
+
+  describe('listStudents()', () => {
+    it('应该在已有学生时返回完整列表', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 85, math: 92, english: 78 },
+        { id: '002', name: '李四', chinese: 90, math: 88, english: 95 }
+      ];
+
+      const result = listStudents(students);
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('共有 2 名学生');
+      expect(result.data).toHaveLength(2);
+      expect(result.data).toEqual(students);
+    });
+
+    it('应该在无学生时提示先录入', () => {
+      const result = listStudents([]);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('暂无学生数据，请先录入');
+      expect(result.data).toEqual([]);
     });
   });
 });

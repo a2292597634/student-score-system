@@ -104,3 +104,41 @@ export function addStudent(students, info) {
 
   return { success: true, message: '学生信息录入成功', data: student };
 }
+
+/**
+ * 按学号精确查询学生
+ * @param {Array} students - 学生列表
+ * @param {string} id - 学号
+ * @returns {{success: boolean, message: string, data: Object|null}}
+ */
+export function findStudent(students, id) {
+  if (!students || students.length === 0) {
+    return { success: false, message: '暂无学生数据，请先录入', data: null };
+  }
+
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    return { success: false, message: '请输入要查询的学号', data: null };
+  }
+
+  const trimmedId = id.trim();
+  const student = students.find((s) => s.id === trimmedId);
+
+  if (!student) {
+    return { success: false, message: `未找到学号为 ${trimmedId} 的学生`, data: null };
+  }
+
+  return { success: true, message: '查询成功', data: student };
+}
+
+/**
+ * 获取全部学生列表
+ * @param {Array} students - 学生列表
+ * @returns {{success: boolean, message: string, data: Array}}
+ */
+export function listStudents(students) {
+  if (!students || students.length === 0) {
+    return { success: false, message: '暂无学生数据，请先录入', data: [] };
+  }
+
+  return { success: true, message: `共有 ${students.length} 名学生`, data: students };
+}
