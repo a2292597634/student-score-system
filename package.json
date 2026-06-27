@@ -1,0 +1,15 @@
+{
+  "name": "student-score-management",
+  "version": "1.0.0",
+  "description": "简易学生成绩管理系统（CLI 应用）",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.8"
+  },
+  "type": "module",
+  "license": "ISC"
+}

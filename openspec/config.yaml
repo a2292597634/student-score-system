@@ -1,0 +1,74 @@
+schema: spec-driven
+
+context: |
+  Project: 简易学生成绩管理系统（轻量文件数据库 CLI 应用）
+  Tech stack: Node.js CLI + 本地 JSON 文件存储 + Vitest 测试框架
+  Storage: JSON 文件持久化（data/students.json）
+  Testing: TDD 硬性要求，先写测试再写实现，测试未通过不算完成
+
+  Directory Conventions (目录约定):
+    src/                 — 源代码
+      main.js            — CLI 入口，命令行交互
+      storage.js         — JSON 文件存储引擎（读写、初始化）
+      student.js         — 学生成绩管理（录入、校验、查询、统计）
+    data/                — 数据文件
+      students.json      — 学生成绩 JSON 持久化文件
+    tests/               — 测试文件
+    spec/                — 规范文档
+      task.md            — 所有迭代任务清单
+      design.md          — 项目架构设计
+      spec.md            — 核心规范文档
+      config.md          — 配置文档
+    openspec/            — OpenSpec 框架目录
+      config.yaml        — 本文件
+      changes/           — 迭代 change 目录
+      templates/         — 模板文件
+
+  Coding Conventions (编码约定):
+    - 代码注释使用中文
+    - UI 文案使用中文
+    - 变量/函数名使用 camelCase
+    - TDD 流程：先写失败测试 (Red) → 再写实现使其通过 (Green) → 最后重构 (Refactor)
+
+  CLI 交互规范:
+    - 使用 readline 模块实现交互式命令行
+    - 一级菜单：录入成绩、查询成绩、成绩统计、查看全部、退出系统
+    - 所有输入均有合法性校验和中文错误提示
+
+rules:
+  global:
+    - 语言规范：所有文档、代码注释必须使用中文，仅保留必要的英文（专有名词、代码标识符）
+    - 禁止自主 commit：必须先展示变更文件列表和 commit message，等用户回复确认后才能执行 git commit
+    - 禁止自主 archive：必须先告知用户即将归档，等用户回复确认后才能执行 archive
+    - 测试规范：每个 change 必须遵守 TDD 流程，不得跳过测试任务，不得先写实现后补测试
+    - 回归测试：每次 change apply 完成后必须运行 npm test 完整回归测试，确认所有已有测试仍然通过
+    - 一致性检查：每次 commit 前必须重读 change 目录下 proposal.md / design.md / spec.md / tasks.md 四个 artifact，对比实际实现内容
+
+  proposal:
+    - change 命名：格式 <动词>-<目标>-YYYY-MM-DD，动词限定 add/refactor/fix/improve/remove
+    - 必须包含成功标准 (Success Criteria)
+    - Impact 必须列出具体的文件变更
+
+  design:
+    - 必须包含目录树 (Directory Layout)
+    - 每个技术决策必须在 spec 中有 Requirement 覆盖
+    - Open Questions 不允许写"无"——至少列出 2 个待确认的假设或风险
+
+  specs:
+    - SHALL 语句必须具体可验证
+    - 每个 Scenario 必须可自动化验证
+    - 每个 spec 文件末尾必须包含 Testing Notes
+
+  tasks:
+    - TDD 执行：每个功能点必须严格执行 Red → Green → Refactor 三步
+    - 每个功能模块任务组必须有对应的测试任务组
+    - 任务粒度控制在单个会话可完成
+    - 安装依赖必须作为显式 task
+    - tasks.md 末尾必须嵌入测试检查清单
+
+  testing:
+    - 每个新增/修改的 src/*.js 必须有对应的 tests/<模块名>.test.js
+    - 测试文件命名：tests/<模块名>.test.js
+    - 每个测试文件至少包含 3 个测试用例
+    - 测试描述必须使用中文，读起来像完整断言
+    - 禁止 mock 掉核心业务逻辑来伪造测试通过
