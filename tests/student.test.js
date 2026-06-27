@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 describe('学生管理 Student', () => {
-  let addStudent, validateStudent, findStudent, listStudents;
+  let addStudent, validateStudent, findStudent, listStudents, calcStudentStats, calcClassStats;
 
   beforeEach(async () => {
     const mod = await import('../src/student.js');
@@ -36,6 +36,8 @@ describe('学生管理 Student', () => {
     validateStudent = mod.validateStudent;
     findStudent = mod.findStudent;
     listStudents = mod.listStudents;
+    calcStudentStats = mod.calcStudentStats;
+    calcClassStats = mod.calcClassStats;
   });
 
   describe('validateStudent()', () => {
@@ -234,6 +236,70 @@ describe('学生管理 Student', () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe('暂无学生数据，请先录入');
       expect(result.data).toEqual([]);
+    });
+  });
+
+  describe('calcStudentStats()', () => {
+    it('应该正确计算学生总分和平均分', () => {
+      const student = { id: '001', name: '张三', chinese: 85, math: 92, english: 78 };
+      const result = calcStudentStats(student);
+
+      expect(result.total).toBe(255);
+      expect(result.average).toBe(85.0);
+    });
+
+    it('应该正确保留平均分一位小数（四舍五入）', () => {
+      const student = { id: '001', name: '张三', chinese: 85, math: 90, english: 78 };
+      const result = calcStudentStats(student);
+
+      expect(result.total).toBe(253);
+      expect(result.average).toBe(84.3);
+    });
+
+    it('应该在传入 null 时返回全 0', () => {
+      const result = calcStudentStats(null);
+
+      expect(result.total).toBe(0);
+      expect(result.average).toBe(0);
+    });
+
+    it('应该在成绩缺失时将该科作 0 处理', () => {
+      const student = { id: '001', name: '张三', chinese: 100, math: null, english: undefined };
+      const result = calcStudentStats(student);
+
+      expect(result.total).toBe(100);
+      expect(result.average).toBe(33.3);
+    });
+  });
+
+  describe('calcClassStats()', () => {
+    it('应该正确计算班级各科平均分', () => {
+      const students = [
+        { id: '001', name: '张三', chinese: 80, math: 90, english: 100 },
+        { id: '002', name: '李四', chinese: 90, math: 80, english: 60 }
+      ];
+
+      const result = calcClassStats(students);
+
+      expect(result.chinese).toBe(85.0);
+      expect(result.math).toBe(85.0);
+      expect(result.english).toBe(80.0);
+    });
+
+    it('应该在传入空数组时返回全 0', () => {
+      const result = calcClassStats([]);
+
+      expect(result.chinese).toBe(0);
+      expect(result.math).toBe(0);
+      expect(result.english).toBe(0);
+    });
+
+    it('应该在传入 null 时返回全 0', () => {
+      const result = calcClassStats(null);
+
+      expect(result.chinese).toBe(0);
+      expect(result.math).toBe(0);
+      expect(result.english).toBe(0);
     });
   });
 });

@@ -142,3 +142,48 @@ export function listStudents(students) {
 
   return { success: true, message: `共有 ${students.length} 名学生`, data: students };
 }
+
+/**
+ * 计算单个学生的总分和平均分（保留1位小数）
+ * @param {Object} student - 学生对象
+ * @returns {{total: number, average: number}}
+ */
+export function calcStudentStats(student) {
+  if (!student) {
+    return { total: 0, average: 0 };
+  }
+
+  const chinese = Number(student.chinese) || 0;
+  const math = Number(student.math) || 0;
+  const english = Number(student.english) || 0;
+  const total = chinese + math + english;
+  const average = Math.round((total / 3) * 10) / 10;
+
+  return { total, average };
+}
+
+/**
+ * 计算班级各科平均分（保留1位小数）
+ * @param {Array} students - 学生列表
+ * @returns {{chinese: number, math: number, english: number}}
+ */
+export function calcClassStats(students) {
+  if (!students || students.length === 0) {
+    return { chinese: 0, math: 0, english: 0 };
+  }
+
+  const count = students.length;
+  const totals = { chinese: 0, math: 0, english: 0 };
+
+  for (const s of students) {
+    totals.chinese += Number(s.chinese) || 0;
+    totals.math += Number(s.math) || 0;
+    totals.english += Number(s.english) || 0;
+  }
+
+  return {
+    chinese: Math.round((totals.chinese / count) * 10) / 10,
+    math: Math.round((totals.math / count) * 10) / 10,
+    english: Math.round((totals.english / count) * 10) / 10
+  };
+}
